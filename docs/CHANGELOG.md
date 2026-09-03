@@ -19,3 +19,26 @@
 * Imported `all-names.csv`
 * 97,697 names
 * Initial audit completed
+
+## [0.1.5] – Data Pipeline Stable
+
+### Added
+
+- `scripts/lib/enrich.py`
+- `scripts/lib/export.py`
+- `scripts/lib/constants.py`
+- Lookup Knowledge Base (`lookup.csv`)
+- Automated unit tests (9 tests)
+
+### Improved
+
+- Modular pipeline architecture
+- Shared constants
+- SEO export
+- Supabase export
+- Parquet export
+- Safer enrichment validation
+
+### Status
+
+Foundation complete. Ready for Supabase integration and Next.js MVP.
