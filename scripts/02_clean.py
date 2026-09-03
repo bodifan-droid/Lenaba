@@ -1,4 +1,3 @@
-
 from pathlib import Path
 
 import pandas as pd
@@ -10,6 +9,7 @@ from lib.parsing import (
 )
 from lib.slugs import slugify, name_length
 from lib.reports import save_json
+from lib.constants import GENDER_MAP
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -34,8 +34,14 @@ df = df.rename(columns={
     "unisex": "is_unisex",
 })
 
-df["gender"] = df["gender"].replace({"F":"Female","M":"Male"})
-df["name"] = df["name"].str.strip().str.title()
+df["gender"] = df["gender"].replace(GENDER_MAP)
+df["name"] = (
+    df["name"]
+      .fillna("")
+      .astype(str)
+      .str.strip()
+      .str.title()
+)
 
 df["variants"] = df["variants"].apply(normalize_variants)
 df["phonetic"] = df["phonetic"].apply(normalize_phonetics)

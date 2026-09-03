@@ -10,15 +10,32 @@ STEPS = [
     ("Data Audit", "01_audit.py"),
     ("Data Clean", "02_clean.py"),
     ("Normalization", "02b_normalize.py"),
+    ("Data Enrich", "03_enrich.py"),
+    ("Data Export", "04_export.py"),
 ]
 
 EXPECTED = [
+    # Reports
     ROOT / "data" / "reports" / "audit_report.html",
+
+    # Clean
+    ROOT / "data" / "cleaned" / "names_cleaned.csv",
     ROOT / "data" / "cleaned" / "names_cleaned.parquet",
+
+    # Normalize outputs
     ROOT / "data" / "cleaned" / "names.parquet",
     ROOT / "data" / "cleaned" / "name_variants.parquet",
     ROOT / "data" / "cleaned" / "phonetics.parquet",
     ROOT / "data" / "cleaned" / "name_stats.parquet",
+
+    # Enrich
+    ROOT / "data" / "enriched" / "lookup.csv",
+    ROOT / "data" / "enriched" / "names_enriched.csv",
+
+    # Export
+    ROOT / "data" / "enriched" / "names_supabase.csv",
+    ROOT / "data" / "enriched" / "names_seo.csv",
+    ROOT / "data" / "enriched" / "names.parquet",
 ]
 
 
@@ -74,8 +91,11 @@ def main():
     print(f"{'='*50}")
     print(f"Time: {elapsed} sec")
     print("Status: SUCCESS")
-    print("Output: data/cleaned/")
-    print("Report: data/reports/audit_report.html")
+    print("Outputs:")
+    print("  • data/cleaned/")
+    print("  • data/enriched/")
+    print("Reports:")
+    print("  • data/reports/audit_report.html")
 
 
 if __name__ == "__main__":
