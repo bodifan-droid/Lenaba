@@ -1,0 +1,25 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f8fffd;
+  --surface: #ffffff;
+  --primary: #35c8a1;
+  --primary-dark: #229a7b;
+  --mint: #eaf8f4;
+  --text: #16332e;
+  --secondary: #5f8a81;
+  --radius: 24px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--background);
+  color: var(--text);
+  font-family: var(--font-manrope), sans-serif;
+}

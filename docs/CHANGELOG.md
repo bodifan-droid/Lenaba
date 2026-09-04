@@ -42,3 +42,32 @@
 ### Status
 
 Foundation complete. Ready for Supabase integration and Next.js MVP.
+
+## [0.2.0] – Core Engine Complete
+
+### Added
+
+* SeedProvider
+* Resolver Chain
+* Pronunciation Engine
+* Tag Generator
+* SEO Writer
+* Enrichment Pipeline
+* Golden Queue
+* Knowledge Seed v2 metadata
+
+### Improved
+
+* Offline-first enrichment
+* IPA generation
+* Human-readable pronunciation
+* Semantic tagging
+* SEO description generation
+
+### Testing
+
+* 20 automated tests passing
+
+### Status
+
+Core data engine complete. Ready for Next.js Mobile MVP.
