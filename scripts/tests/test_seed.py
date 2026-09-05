@@ -28,7 +28,10 @@ def test_seed_has_v2_metadata_columns():
 
 
 def test_parquet_preserves_v2_metadata_columns():
-    subprocess.run([sys.executable, "scripts/build_seed.py"], check=True)
+    subprocess.run(
+        [sys.executable, "scripts/builders/build_seed.py"],
+        check=True,
+    )
 
     columns = set(pd.read_parquet("data/seed/knowledge_seed.parquet").columns)
     assert V2_COLUMNS <= columns

@@ -71,3 +71,40 @@ Foundation complete. Ready for Supabase integration and Next.js MVP.
 ### Status
 
 Core data engine complete. Ready for Next.js Mobile MVP.
+
+## [0.2.5] – Content Foundation Complete
+
+### Added
+
+- Knowledge Vault architecture
+- BaseProvider foundation
+- Wikipedia Provider
+- Wikidata Provider compatibility layer
+- Editorial Queue (`campaign`, `stage`)
+- Knowledge Batch v2
+- Knowledge Audit tool
+- Content Registry validation improvements
+
+### Improved
+
+- Provider Contract v1
+- Safer Content Factory enrichment
+- Stable offline-first enrichment workflow
+- Better CSV handling (`low_memory=False`)
+- Correct business-key validation (`id` + `name, gender`)
+
+### Testing
+
+- 22 automated tests passing
+- 0 warnings
+
+### Dataset
+
+- 97,697 names maintained
+- Golden 500 editorial workflow established
+- IPA, Tags and SEO available for all Golden names
+- Knowledge Vault expanded through batch enrichment
+
+### Status
+
+Content infrastructure complete. Ready to begin Golden 500 knowledge campaign and Mobile MVP.
