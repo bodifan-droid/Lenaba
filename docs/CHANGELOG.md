@@ -108,3 +108,62 @@ Core data engine complete. Ready for Next.js Mobile MVP.
 ### Status
 
 Content infrastructure complete. Ready to begin Golden 500 knowledge campaign and Mobile MVP.
+
+## [0.2.6] – Repository Cleanup
+
+### Added
+
+- `scripts/lib/schema.py`
+- `scripts/lib/paths.py`
+- `scripts/cli.py`
+- `builders/`, `audits/`, `pipeline/`, `importers/` structure
+
+### Changed
+
+- Unified project path management.
+- Centralized data schema contract.
+- Builders migrated into dedicated folder.
+- Audit scripts separated from builders.
+- Pipeline isolated into its own module.
+
+### Improved
+
+- Cleaner repository architecture.
+- Single CLI entry point.
+- Reduced duplicated path logic.
+- Easier future GitHub Actions integration.
+
+### Status
+
+Repository architecture stabilized.
+Ready for large-scale knowledge ingestion.
+
+## [0.2.6] – Repository Cleanup
+
+### Added
+
+- `scripts/lib/schema.py`
+- `scripts/lib/paths.py`
+- `scripts/cli.py`
+- `builders/`, `audits/`, `pipeline/`, `importers/` structure
+- `knowledge_master.parquet`
+
+### Changed
+
+- Unified project path management.
+- Centralized data schema contract.
+- Builders migrated into dedicated folder.
+- Audit scripts separated from builders.
+- Pipeline isolated into its own module.
+
+### Improved
+
+- Single CLI entry point.
+- Cleaner repository architecture.
+- Imported 20,505 BehindTheName records.
+- Knowledge Master now contains 20,645 canonical records.
+
+### Status
+
+Repository architecture stabilized.
+Ready for Golden 500 enrichment and Mobile MVP.
