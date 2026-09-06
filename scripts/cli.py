@@ -24,8 +24,21 @@ COMMANDS = {
 
 
 def run_script(path: Path):
-    print(f"[RUN] {path.relative_to(ROOT)}")
-    subprocess.run([sys.executable, str(path)], check=True)
+    module = (
+        path.relative_to(ROOT)
+            .with_suffix("")
+            .as_posix()
+            .replace("/", ".")
+    )
+
+    print(f"[RUN] {module}")
+
+    subprocess.run(
+        [sys.executable, "-m", module],
+        cwd=ROOT,
+        check=True,
+    )
+
     print("[OK]\n")
 
 

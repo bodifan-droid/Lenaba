@@ -1,11 +1,9 @@
-
 from __future__ import annotations
 
 from datetime import datetime
-from pathlib import Path
 import sys
 
-ROOT = Path(__file__).resolve().parents[2]
+from scripts.lib.paths import ROOT, CONTENT, KNOWLEDGE
 
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
@@ -15,8 +13,9 @@ import pandas as pd
 from scripts.lib.providers.behind_name import BehindTheNameProvider
 from scripts.lib.confidence import can_verify
 
-REGISTRY = ROOT / "data/content/content_registry.parquet"
-PACKS_DIR = ROOT / "data/content/packs"
+REGISTRY = CONTENT / "content_registry.parquet"
+PACKS_DIR = CONTENT / "packs"
+MASTER = KNOWLEDGE / "knowledge_master.parquet"
 
 PACK_SIZE = 100
 
@@ -33,12 +32,38 @@ def next_pack_number():
 
     return int(last) + 1
 
+def has_value(value):
+    """Array-safe check for meaningful values."""
+
+    if isinstance(value, list):
+        return len(value) > 0
+
+    if hasattr(value, "size"):   # numpy array
+        return value.size > 0
+
+    if pd.isna(value):
+        return False
+
+    if isinstance(value, str):
+        return value.strip() != ""
+
+    return True
 
 def main():
 
     provider = BehindTheNameProvider()
 
     df = pd.read_parquet(REGISTRY)
+
+    master = pd.read_parquet(MASTER)
+
+    master = (
+        master
+        .sort_values("confidence")
+        .drop_duplicates("name", keep="last")
+    )
+
+    lookup = master.set_index("name")
 
     queued = (
         df[
@@ -63,30 +88,66 @@ def main():
         if df.at[idx, "stage"] == "queued":
             df.at[idx, "stage"] = "processing"
 
-        result = provider.resolve(row["name"])
+        name = row["name"]
 
-        if result:
+# ---------- 1. Спочатку беремо з Knowledge Master ----------
+
+        if name in lookup.index:
+
+            kb = lookup.loc[name]
+
+            for field in [
+                "meaning",
+                "origin",
+                "pronunciation",
+                "gender",
+                "variants",
+                "equivalents",
+                "scripts",
+            ]:
+                if field in kb.index:
+                    value = kb[field]
+
+                    if has_value(value):
+                        df.at[idx, field] = value
+
+            confidence = kb.get("confidence", 0)
+            source = kb.get("source", "knowledge_master")
+
+# ---------- 2. Якщо нема — звертаємось до Provider ----------
+
+        else:
+
+            result = provider.resolve(name)
+
+            if result is None:
+                continue
 
             if result.meaning:
                 df.at[idx, "meaning"] = result.meaning
-                df.at[idx, "meaning_done"] = True
 
             if result.origin:
                 df.at[idx, "origin"] = result.origin
-                df.at[idx, "origin_done"] = True
 
             if result.pronunciation:
                 df.at[idx, "pronunciation"] = result.pronunciation
 
-            df.at[idx, "source"] = result.source
-            df.at[idx, "confidence"] = result.confidence
+            confidence = result.confidence
+            source = result.source
 
-            if can_verify(result.confidence):
+# ---------- Common ----------
 
-                df.at[idx, "verified"] = True
-                df.at[idx, "stage"] = "verified"
+        df.at[idx, "source"] = source
+        df.at[idx, "confidence"] = confidence
 
-            processed += 1
+        df.at[idx, "meaning_done"] = bool(df.at[idx, "meaning"])
+        df.at[idx, "origin_done"] = bool(df.at[idx, "origin"])
+
+        if can_verify(confidence):
+            df.at[idx, "verified"] = True
+            df.at[idx, "stage"] = "verified"
+
+        processed += 1
 
     pack = (
         df[
