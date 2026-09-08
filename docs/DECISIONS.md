@@ -40,3 +40,5 @@ All transformations happen through scripts.
 Roadmap Locked
 
 Foundation → UX → Backend → Frontend → SEO → Launch
+
+Decision: Taxonomy v1 is considered a completed asset but postponed for product integration until after the Mobile MVP.

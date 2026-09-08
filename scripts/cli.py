@@ -16,10 +16,22 @@ COMMANDS = {
     ("build", "pack"): ROOT / "scripts/builders/build_golden_pack.py",
     ("build", "factory"): ROOT / "scripts/builders/build_content_factory.py",
     ("build", "master"): ROOT / "scripts/builders/build_knowledge_master.py",
+    ("build", "completion"): ROOT / "scripts/builders/build_completion_levels.py",
+    ("build", "forms"): ROOT / "scripts/builders/merge_behind_forms.py",
+    ("build", "finalize"): ROOT / "scripts/builders/build_finalize_behind_import.py",
+    ("build", "graph"): ROOT / "scripts/builders/build_name_graph.py",
+    ("build", "integrity"): ROOT / "scripts/builders/build_graph_integrity.py",
+    ("build", "taxonomy"): ROOT / "scripts/builders/build_taxonomy.py",
 
     ("audit", "factory"): ROOT / "scripts/audits/audit_content_factory.py",
     ("audit", "master"): ROOT / "scripts/audits/audit_knowledge_master.py",
     ("audit", "batch"): ROOT / "scripts/audits/audit_knowledge_batch.py",
+    ("audit", "completion"): ROOT / "scripts/audits/audit_completion.py",
+    ("audit", "mapping"): ROOT / "scripts/audits/audit_mapping.py",
+    ("audit", "graph"): ROOT / "scripts/audits/audit_name_graph.py",
+    ("audit", "templates"): ROOT / "scripts/audits/audit_template_candidates.py",
+    ("audit", "taxonomy"): ROOT / "scripts/audits/audit_taxonomy.py",
+    ("audit", "taxonomy-sources"): ROOT / "scripts/audits/audit_taxonomy_sources.py",
 }
 
 
@@ -60,6 +72,7 @@ def help_screen():
     print("  python scripts/cli.py audit master")
     print("  python scripts/cli.py audit factory")
     print("  python scripts/cli.py audit batch")
+    print("  python scripts/cli.py audit completion")
     print()
     print("Other:")
     print("  python scripts/cli.py test")

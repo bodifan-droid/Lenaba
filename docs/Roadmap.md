@@ -13,6 +13,23 @@
 * Design System
 * Interactive Prototype
 
+## Future Assets (Post-MVP)
+
+### Taxonomy v2
+
+Status: Dormant Asset
+
+Goal:
+Complete the taxonomy model and integrate it into the product after the Mobile MVP.
+
+Tasks:
+
+- Refine taxonomy structure.
+- Separate language and domain categories.
+- Generate taxonomy index.
+- Add SEO category pages.
+- Add taxonomy filters inside the app.
+
 ## Week 3 — Backend
 
 * Supabase
