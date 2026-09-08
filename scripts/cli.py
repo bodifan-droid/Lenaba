@@ -22,6 +22,8 @@ COMMANDS = {
     ("build", "graph"): ROOT / "scripts/builders/build_name_graph.py",
     ("build", "integrity"): ROOT / "scripts/builders/build_graph_integrity.py",
     ("build", "taxonomy"): ROOT / "scripts/builders/build_taxonomy.py",
+    ("build", "families"): ROOT / "scripts/builders/build_canonical_families.py",    
+    ("build", "cleanup"): ROOT / "scripts/builders/fix_master_cleanup.py",
 
     ("audit", "factory"): ROOT / "scripts/audits/audit_content_factory.py",
     ("audit", "master"): ROOT / "scripts/audits/audit_knowledge_master.py",
@@ -32,6 +34,8 @@ COMMANDS = {
     ("audit", "templates"): ROOT / "scripts/audits/audit_template_candidates.py",
     ("audit", "taxonomy"): ROOT / "scripts/audits/audit_taxonomy.py",
     ("audit", "taxonomy-sources"): ROOT / "scripts/audits/audit_taxonomy_sources.py",
+    ("audit", "integrity"): ROOT / "scripts/audits/audit_integrity.py",
+    ("audit", "confidence"): ROOT / "scripts/audits/audit_confidence.py",
 }
 
 

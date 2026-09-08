@@ -7,6 +7,23 @@
 * [x] Repository
 * [ ] Data Pipeline
 
+## Architecture Freeze (v0.4.5)
+
+**Single Source of Truth**
+
+* Main database: **97,697 names**
+* BehindTheName: donor knowledge only
+* `knowledge_master`: temporary enrichment cache
+* Providers enrich the main database through Smart Queue and Merge Engine.
+
+### Deferred after MVP
+
+* Taxonomy v2
+* Graph Ranking
+* Recommendation Engine
+* Advanced Family Scoring
+
+
 ## Week 2 — UX/UI
 
 * Wireframes

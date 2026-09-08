@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 
 from scripts.lib.paths import IMPORTS, KNOWLEDGE
+from scripts.lib.validate_master import run_integrity_gate
 
 SOURCE = IMPORTS / "behind_the_name" / "dataset3.csv"
 MASTER = KNOWLEDGE / "knowledge_master.parquet"
@@ -85,6 +86,8 @@ def main():
     source = pd.read_csv(SOURCE, low_memory=False)
 
     master = pd.read_parquet(MASTER)
+
+    run_integrity_gate(master)
 
     # виправляємо опечатку BehindTheName
     if "pronounciation" in source.columns:

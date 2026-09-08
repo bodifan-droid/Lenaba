@@ -3,8 +3,10 @@ from __future__ import annotations
 import pandas as pd
 
 from scripts.lib.paths import KNOWLEDGE
+from scripts.lib.validate_master import run_integrity_gate
 
 MASTER = KNOWLEDGE / "knowledge_master.parquet"
+
 
 
 def has_text(value):
@@ -67,6 +69,8 @@ def level(row):
 def main():
 
     df = pd.read_parquet(MASTER)
+
+    run_integrity_gate(df)
 
     df["completion_level"] = df.apply(level, axis=1)
 
