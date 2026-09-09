@@ -23,6 +23,27 @@
 * Recommendation Engine
 * Advanced Family Scoring
 
+## Sprint v0.5 — Full Coverage
+
+### Day 1 (Done)
+
+- [x] Execution Queue
+- [x] Execution Batches
+- [x] Language Resolver
+- [x] Smart Queue V3
+- [x] Behind Executor MVP
+- [x] Behind Cache
+- [x] HTML Snapshot (Yamila)
+
+### Day 2 (Next)
+
+- [ ] Production HTML Parser
+- [ ] Dry Run (5 names)
+- [ ] Arabic batch
+- [ ] Merge into knowledge_master
+- [ ] Cache integration
+- [ ] Resume after interruption
+
 
 ## Week 2 — UX/UI
 

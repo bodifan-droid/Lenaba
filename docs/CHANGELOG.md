@@ -378,3 +378,55 @@ Ready for Golden 500 enrichment and Mobile MVP.
 Autonomous Knowledge Engine complete.
 
 Ready to begin Next.js Mobile MVP.
+
+## [0.4.5] – Smart Knowledge Expansion
+
+### Added
+
+* `build_canonical_families.py`
+* `canonical_families.parquet`
+* Data Integrity Gate (`validate_master.py`)
+* `audit_integrity.py`
+* Graph optimization (Union-Find + progress logging)
+
+### Improved
+
+* BehindTheName ingestion workflow
+* Family-first enrichment architecture
+* Stable graph traversal
+* NaN-safe processing
+
+### Architecture
+
+* 97,697 names confirmed as the single source of truth.
+* BehindTheName designated as a donor knowledge source.
+* `knowledge_master` redefined as a temporary enrichment cache.
+* Canonical families prepared for Smart Queue.
+
+### Status
+
+Sprint v0.4.5 completed.
+Ready for Smart Queue and Merge Engine.
+
+## v0.5.0 — Execution Layer Foundation
+
+### Added
+
+- Execution Queue (4,261 tasks)
+- Execution Batches (111 language batches)
+- Language Resolver
+- Smart Queue V3
+- Behind Executor MVP
+- Behind Cache
+- HTML Snapshot test fixture
+
+### Changed
+
+- Switched from BehindTheName API strategy to HTML-based Smart Fetcher.
+- Introduced resumable execution using `fetch_state.json`.
+
+### Next
+
+- Production HTML parser.
+- Incremental fetch pipeline.
+- Merge fetched data into knowledge_master.
