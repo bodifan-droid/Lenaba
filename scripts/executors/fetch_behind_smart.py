@@ -10,6 +10,10 @@ import requests
 from dotenv import load_dotenv
 from datetime import datetime
 from bs4 import BeautifulSoup
+from scripts.lib.behind_client import fetch_html
+from scripts.lib.behind_cache import get_cached, save_cache
+from scripts.lib.behind_parser import parse_name_page
+from scripts.lib.fetch_results import save_result
 
 from scripts.lib.paths import EXECUTION, KNOWLEDGE
 
@@ -69,6 +73,53 @@ def fetch_name(name: str):
         "fetched_at": datetime.utcnow().isoformat(),
     }
 
+def fetch_family(name):
+
+    cached = get_cached(name)
+
+    if cached:
+
+        from scripts.lib.etymology_writer import append_relations
+
+        append_relations(name, cached)
+
+        cached["cached"] = True
+
+        return cached
+
+    url, html = fetch_html(name)
+
+    if html is None:
+
+        return {
+            "cached": False,
+            "status": "not_found",
+            "name": name,
+        }
+
+    parsed = parse_name_page(html)
+
+    save_result(name, parsed)
+
+    from scripts.lib.etymology_writer import append_relations
+
+    append_relations(name, parsed)
+
+    from scripts.builders.build_family_merge import main as family_merge_main
+
+    family_merge_main()
+
+    save_cache(
+        name=name,
+        url=url,
+        html=html,
+        parsed=parsed,
+    )
+
+    parsed["cached"] = False
+
+    return parsed
+
 def load_state():
 
     if not STATE.exists():
@@ -97,7 +148,8 @@ def save_state(state):
     )
 
 
-def start_batch(batch_name):
+
+def start_batch(batch_name, limit=None):
 
     queue = pd.read_parquet(QUEUE)
 
@@ -105,6 +157,9 @@ def start_batch(batch_name):
         (queue["executor"] == "behind")
         & (queue["batch_key"] == batch_name)
     ]
+
+    if limit:
+        rows = rows.head(limit)
 
     state = load_state()
 
@@ -117,7 +172,35 @@ def start_batch(batch_name):
     print(f"Families : {len(rows):,}")
     print(f"Names    : {rows['estimated_gain'].sum():,}")
     print()
-    print("API executor will be attached in the next step.")
+
+    completed = 0
+
+    for family in rows.itertuples(index=False):
+
+        print(f"[{completed+1}/{len(rows)}] {family.canonical_name}")
+
+        result = fetch_family(family.canonical_name)
+
+        status = result.get("status")
+
+        if status == "not_found":
+            print("    status : skipped (404)")
+        elif result.get("cached"):
+            print("    status : cached")
+        else:
+            print("    status : fetched")
+
+        completed += 1
+
+    state["completed_families"] += completed
+
+    save_state(state)
+
+    print()
+    print("=" * 55)
+    print("BATCH COMPLETE")
+    print("=" * 55)
+    print(f"Families processed : {completed}")
 
 
 def preview():
@@ -177,9 +260,24 @@ def main():
         preview_batch(args[1])
         return
 
+    if args[0] == "test":
+
+        from pprint import pprint
+
+        pprint(fetch_family("Yamila"))
+
+        return
+
+
     if args[0] == "batch":
 
-        start_batch(args[1])
+        limit = None
+
+        if "--limit" in args:
+            limit = int(args[args.index("--limit") + 1])
+
+        start_batch(args[1], limit)
+
         return
 
     if args[0] == "test":

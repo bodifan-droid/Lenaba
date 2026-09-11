@@ -430,3 +430,43 @@ Ready for Smart Queue and Merge Engine.
 - Production HTML parser.
 - Incremental fetch pipeline.
 - Merge fetched data into knowledge_master.
+
+# Changelog
+
+## v0.6 — Data Platform
+
+### Added
+
+- Data Platform V1 architecture
+- Official data layer documentation
+- Single Source of Truth concept
+
+### Changed
+
+- Knowledge Master migration plan to 97,697 names
+- Formal separation of data layers
+
+### Fixed
+
+- Documented historical pipeline divergence.
+
+## v1.0 Data Platform Freeze
+
+### Added
+
+- Production Master (97,697)
+- Family Lookup V2
+- Family Merge Layer
+- Legacy Patch Engine
+- Platform Audit
+
+### Changed
+
+- Single Source of Truth migrated to Production Master.
+- Family coverage increased from 0.10% to 89.96%.
+
+### Fixed
+
+- Merge idempotency
+- Schema normalization
+- Confidence normalization

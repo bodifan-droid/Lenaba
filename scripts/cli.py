@@ -33,6 +33,17 @@ COMMANDS = {
     ("build","batches"): ROOT/"scripts/builders/build_execution_batches.py",
     ("build", "fetch-results"): ROOT / "scripts/builders/build_fetch_results.py",
     ("build", "behind-cache"): ROOT / "scripts/builders/build_behind_cache.py",
+    ("build", "parser-test"): ROOT / "scripts/builders/build_parser_test.py",
+    ("build", "etymology"): ROOT / "scripts/builders/build_etymology_graph.py",
+    ("build", "merge"): ROOT / "scripts/builders/build_merge_fetch_results.py",
+    ("build", "confidence"): ROOT / "scripts/builders/fix_confidence_scale.py",
+    ("build", "master-v2"): ROOT / "scripts/builders/build_master_v2.py",
+    ("build", "confidence-v2"): ROOT / "scripts/builders/fix_confidence_v2.py",
+    ("build", "schema"): ROOT / "scripts/builders/build_master_schema.py",
+    ("build", "legacy-patch"): ROOT / "scripts/builders/build_legacy_patch.py",
+    ("build", "family-lookup"): ROOT / "scripts/builders/build_family_lookup_v2.py",
+    ("build", "confidence-v3"): ROOT / "scripts/builders/fix_confidence_v3.py",
+    ("build", "family-merge"): ROOT / "scripts/builders/build_family_merge.py",
 
     ("audit", "factory"): ROOT / "scripts/audits/audit_content_factory.py",
     ("audit", "master"): ROOT / "scripts/audits/audit_knowledge_master.py",
@@ -51,6 +62,10 @@ COMMANDS = {
     ("audit", "smart-queue"): ROOT / "scripts/audits/audit_smart_queue_v3.py",
     ("audit", "execution"): ROOT / "scripts/audits/audit_execution_queue.py",
     ("audit","batches"): ROOT/"scripts/audits/audit_execution_batches.py",
+    ("audit", "etymology"): ROOT / "scripts/audits/audit_etymology_graph.py",
+    ("audit", "schema"): ROOT / "scripts/audits/audit_master_schema.py",
+    ("audit", "family-lookup"): ROOT / "scripts/audits/audit_family_lookup.py",
+    ("audit", "platform"): ROOT / "scripts/audits/audit_platform.py",
 
     ("fetch",): ROOT / "scripts/executors/fetch_behind_smart.py",
 }
