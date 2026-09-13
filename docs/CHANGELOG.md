@@ -516,3 +516,16 @@ All notable changes to Lenaba are documented here.
 ### Result
 
 The BehindTheName execution queue now completes automatically without manual intervention, making Lenaba's first autonomous Data Engine operational.
+
+## v0.8 — Autopilot Data Engine
+
+- Introduced autonomous BehindTheName execution
+- Added Smart Queue v3
+- Added Execution Queue
+- Added Candidate Discovery
+- Added Overnight Mode
+- Added Human Delay
+- Added Family Verification
+- Stabilized Family Graph state handling
+- Fixed cache replay and parquet compatibility
+- Reduced Behind Queue from 31 to 0

@@ -1,5 +1,5 @@
 {
-  "last_batch": "Irish",
+  "last_batch": "Hebrew",
   "completed_batches": [
     "Hebrew",
     "English",
@@ -12,6 +12,10 @@
     "Slavic",
     "Irish"
   ],
-  "completed_families": 81,
-  "completed_family_names": []
+  "completed_families": 84,
+  "completed_family_names": [
+    "SIMON",
+    "JYTTE",
+    "NYYRIKKI"
+  ]
 }

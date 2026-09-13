@@ -54,6 +54,11 @@ def main():
     master_lookup = master.set_index("name")
     lang_lookup = resolver.set_index("name")
 
+    # статус уже перевірених сімей
+    family_status = pd.read_parquet(
+        KNOWLEDGE / "family_graph.parquet"
+    )
+
     rows = []
 
     order = {
@@ -165,8 +170,40 @@ def main():
             "priority": estimated_gain,
         })
 
+    queue = pd.DataFrame(rows)
+
+    family_status = family_status[
+        ["name", "family_status"]
+    ].copy()
+
+    family_status["_key"] = (
+        family_status["name"]
+        .astype(str)
+        .str.upper()
+    )
+
+    queue["_key"] = (
+        queue["canonical_name"]
+        .astype(str)
+        .str.upper()
+    )
+
+    queue = queue.merge(
+        family_status[["_key", "family_status"]],
+        on="_key",
+        how="left",
+    )
+
+    queue.drop(columns="_key", inplace=True)
+
+    queue = queue[
+        ~queue["family_status"].isin(
+            ["verified", "completed"]
+        )
+    ]
+
     queue = (
-        pd.DataFrame(rows)
+        queue
         .sort_values(
             ["estimated_gain", "family_size"],
             ascending=False,

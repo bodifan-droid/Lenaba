@@ -1,6 +1,6 @@
 
 from __future__ import annotations
-
+from scripts.lib.family_status import mark_completed
 import sys
 import pandas as pd
 import json
@@ -112,6 +112,7 @@ def fetch_family(name):
         append_relations(name, cached)
 
         stats = after_fetch(name, cached)
+        mark_completed(name)
 
         cached["cached"] = True
         cached["stats"] = stats
@@ -140,6 +141,7 @@ def fetch_family(name):
     )
 
     stats = after_fetch(name, parsed)
+    mark_completed(name)
 
     parsed["stats"] = stats
     parsed["cached"] = False
@@ -336,6 +338,7 @@ def start_batch(batch_name, limit=None):
         )
 
         save_state(state)
+        continue
 
     state["completed_families"] += completed
 
@@ -467,7 +470,15 @@ def main():
 
     if args[0] == "auto":
 
-        batch = next_batch()
+        batch = next_nonempty_batch()
+
+        if batch is None:
+
+            print("Queue completed.")
+            return
+
+        start_batch(batch)
+        return
 
         if batch is None:
 
