@@ -14,6 +14,10 @@ from scripts.lib.behind_client import fetch_html
 from scripts.lib.behind_cache import get_cached, save_cache
 from scripts.lib.behind_parser import parse_name_page
 from scripts.lib.fetch_results import save_result
+from scripts.lib.pipeline_hooks import after_fetch
+from scripts.lib.human_delay import HumanDelay
+from scripts.lib.fetch_controller import FetchController
+from scripts.lib.queue_selector import next_batch
 
 from scripts.lib.paths import EXECUTION, KNOWLEDGE
 
@@ -28,6 +32,9 @@ API_KEY = os.getenv("BEHIND_NAME_API_KEY")
 
 if not API_KEY:
     raise RuntimeError("BEHIND_NAME_API_KEY not found in .env")
+
+human = HumanDelay()
+controller = FetchController()
 
 
 def fetch_name(name: str):
@@ -79,11 +86,35 @@ def fetch_family(name):
 
     if cached:
 
+        LIST_FIELDS = [
+            "variants",
+            "other_languages",
+            "equivalents",
+            "related",
+            "diminutives",
+            "feminine_forms",
+            "masculine_forms",
+            "surname_descendants",
+        ]
+
+        for field in LIST_FIELDS:
+
+            value = cached.get(field)
+
+            if value is None:
+                cached[field] = []
+
+            elif hasattr(value, "tolist"):
+                cached[field] = value.tolist()
+
         from scripts.lib.etymology_writer import append_relations
 
         append_relations(name, cached)
 
+        stats = after_fetch(name, cached)
+
         cached["cached"] = True
+        cached["stats"] = stats
 
         return cached
 
@@ -101,14 +132,6 @@ def fetch_family(name):
 
     save_result(name, parsed)
 
-    from scripts.lib.etymology_writer import append_relations
-
-    append_relations(name, parsed)
-
-    from scripts.builders.build_family_merge import main as family_merge_main
-
-    family_merge_main()
-
     save_cache(
         name=name,
         url=url,
@@ -116,6 +139,9 @@ def fetch_family(name):
         parsed=parsed,
     )
 
+    stats = after_fetch(name, parsed)
+
+    parsed["stats"] = stats
     parsed["cached"] = False
 
     return parsed
@@ -130,6 +156,7 @@ def load_state():
             "last_batch": None,
             "completed_batches": [],
             "completed_families": 0,
+            "completed_family_names": [],
         }
 
         STATE.write_text(
@@ -137,8 +164,15 @@ def load_state():
             encoding="utf-8",
         )
 
-    return json.loads(STATE.read_text(encoding="utf-8"))
+    state = json.loads(
+        STATE.read_text(encoding="utf-8")
+    )
 
+    state.setdefault("completed_family_names", [])
+
+    state.setdefault("completed_batches", [])
+
+    return state
 
 def save_state(state):
 
@@ -147,23 +181,66 @@ def save_state(state):
         encoding="utf-8",
     )
 
+def next_nonempty_batch():
 
+    while True:
+
+        state = load_state()
+
+        batch = next_batch(
+            state.get("completed_batches", [])
+        )
+
+        if batch is None:
+            return None
+
+        queue = pd.read_parquet(QUEUE)
+
+        done = set(
+            state.get("completed_family_names", [])
+        )
+
+        remaining = queue[
+            (queue["executor"] == "behind")
+            & (queue["batch_key"] == batch)
+            & (~queue["canonical_name"].isin(done))
+        ]
+
+        if not remaining.empty:
+            return batch
+
+        state["completed_batches"].append(batch)
+        state["completed_family_names"] = []
+
+        save_state(state)
 
 def start_batch(batch_name, limit=None):
 
     queue = pd.read_parquet(QUEUE)
+
+    state = load_state()
+
+    if state.get("last_batch") != batch_name:
+        state["completed_family_names"] = []
 
     rows = queue[
         (queue["executor"] == "behind")
         & (queue["batch_key"] == batch_name)
     ]
 
+    done = set(state.get("completed_family_names", []))
+
+    rows = rows[
+        ~rows["canonical_name"].isin(done)
+    ]
+
+    total_families = len(rows)
+
     if limit:
         rows = rows.head(limit)
 
-    state = load_state()
-
     state["last_batch"] = batch_name
+
     save_state(state)
 
     print("=" * 55)
@@ -174,33 +251,113 @@ def start_batch(batch_name, limit=None):
     print()
 
     completed = 0
+    cached_count = 0
+    fetched_count = 0
+    skipped_count = 0
+    new_candidates_total = 0
+
+    session_start = datetime.utcnow()
 
     for family in rows.itertuples(index=False):
 
         print(f"[{completed+1}/{len(rows)}] {family.canonical_name}")
 
-        result = fetch_family(family.canonical_name)
+        human.wait()
+
+        for attempt in range(3):
+
+            try:
+
+                result = fetch_family(family.canonical_name)
+
+                controller.success_request()
+
+                break
+
+            except Exception:
+
+                controller.failed_request()
+
+                if attempt == 2:
+                    raise
+
+                controller.retry_delay(attempt)
 
         status = result.get("status")
 
+        stats = result.get("stats", {})
+
+        new_candidates_total += stats.get("new_names", 0)
+
+        if stats:
+
+            if stats["master"]:
+                print(f"    master write : {stats['master']} fields")
+            else:
+                print("    master write : already complete")
+
+            if stats["merged"]:
+                print(f"    family merge : {stats['merged']} fields")
+            else:
+                print("    family merge : already complete")
+
+            if stats["verified"]:
+                print("    family verified")
+
+            if stats["new_names"]:
+                print(f"    new candidates : {stats['new_names']}")
+
+            if stats["candidate_names"]:
+
+                from scripts.lib.candidate_writer import save_candidates
+
+                save_candidates(
+                    family=family.canonical_name,
+                    names=stats["candidate_names"],
+                )
+
         if status == "not_found":
+            skipped_count += 1
             print("    status : skipped (404)")
+
         elif result.get("cached"):
+            cached_count += 1
             print("    status : cached")
+
         else:
+            fetched_count += 1
             print("    status : fetched")
 
         completed += 1
+
+        if family.canonical_name not in state["completed_family_names"]:
+            state["completed_family_names"].append(
+            family.canonical_name
+        )
+
+        save_state(state)
 
     state["completed_families"] += completed
 
     save_state(state)
 
+    elapsed = datetime.utcnow() - session_start
+
     print()
     print("=" * 55)
     print("BATCH COMPLETE")
     print("=" * 55)
+    print()
+    print("Session Summary")
+    print("-" * 20)
+    print(f"Batch              : {batch_name}")
     print(f"Families processed : {completed}")
+    print(f"Cached             : {cached_count}")
+    print(f"Fetched            : {fetched_count}")
+    print(f"Skipped (404)      : {skipped_count}")
+    print(f"New candidates     : {new_candidates_total}")
+    print(f"Elapsed            : {str(elapsed).split('.')[0]}")
+    print(f"Progress           : {completed}/{total_families}")
 
 
 def preview():
@@ -268,6 +425,59 @@ def main():
 
         return
 
+    if args[0] == "resume":
+
+        state = load_state()
+
+        batch = next_nonempty_batch()
+
+        start_batch(batch)
+
+        human.after_batch()
+
+        return
+
+    if args[0] == "overnight":
+
+        print("=" * 55)
+        print("LENABA OVERNIGHT MODE")
+        print("=" * 55)
+
+        session = 0
+
+        while True:
+
+            batch = next_nonempty_batch()
+
+            if batch is None:
+                print("Queue completed.")
+                break
+
+            session += 1
+
+            print()
+            print(f"Session {session}")
+            print(f"Next batch: {batch}")
+
+            start_batch(batch)
+
+            human.after_batch()
+
+        return
+
+    if args[0] == "auto":
+
+        batch = next_batch()
+
+        if batch is None:
+
+            print("Queue is empty.")
+
+            return
+
+        start_batch(batch)
+
+        return
 
     if args[0] == "batch":
 
@@ -278,11 +488,6 @@ def main():
 
         start_batch(args[1], limit)
 
-        return
-
-    if args[0] == "test":
-
-        print(fetch_name("Yamila"))
         return
 
     print("Unknown command.")

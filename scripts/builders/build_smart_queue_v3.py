@@ -1,4 +1,3 @@
-
 from __future__ import annotations
 
 import pandas as pd
@@ -16,6 +15,16 @@ LOCAL_IPA_LANGUAGES = {
     "Croatian","Slovene","Romanian","Hungarian",
     "Swedish","Norwegian","Danish","Finnish",
     "Irish","Scottish"
+}
+
+FIELD_WEIGHTS = {
+    "meaning": 3,
+    "origin": 2,
+    "pronunciation": 2,
+    "root": 2,
+    "other_languages": 2,
+    "equivalents": 1,
+    "related": 1,
 }
 
 
@@ -47,6 +56,14 @@ def main():
 
     rows = []
 
+    order = {
+        "empty":0,
+        "bronze":1,
+        "silver":2,
+        "gold":3,
+        "platinum":4,
+    }
+
     for family_id, group in families.groupby("family_id"):
 
         aliases = group["alias"].tolist()
@@ -55,18 +72,14 @@ def main():
         has_meaning = False
         has_origin = False
         has_pron = False
+        has_root = False
+        has_other_languages = False
+        has_equivalents = False
+        has_related = False
 
         best_level = "empty"
         dominant_lang = None
         lang_conf = 0
-
-        order = {
-            "empty":0,
-            "bronze":1,
-            "silver":2,
-            "gold":3,
-            "platinum":4,
-        }
 
         for alias in aliases:
 
@@ -78,16 +91,20 @@ def main():
             has_meaning |= has_text(row.get("meaning"))
             has_origin |= has_text(row.get("origin"))
             has_pron |= has_text(row.get("pronunciation"))
+            has_root |= has_text(row.get("root"))
+            has_other_languages |= has_text(row.get("other_languages"))
+            has_equivalents |= has_text(row.get("equivalents"))
+            has_related |= has_text(row.get("related"))
 
-            lvl = str(row.get("completion_level","empty"))
+            lvl = str(row.get("completion_level", "empty"))
 
-            if order[lvl] > order[best_level]:
+            if order.get(lvl, 0) > order[best_level]:
                 best_level = lvl
 
             if alias in lang_lookup.index:
 
-                lang = lang_lookup.at[alias,"dominant_language"]
-                conf = lang_lookup.at[alias,"confidence"]
+                lang = lang_lookup.at[alias, "dominant_language"]
+                conf = lang_lookup.at[alias, "confidence"]
 
                 if conf > lang_conf:
                     dominant_lang = lang
@@ -104,6 +121,18 @@ def main():
         if not has_pron:
             missing.append("pronunciation")
 
+        if not has_root:
+            missing.append("root")
+
+        if not has_other_languages:
+            missing.append("other_languages")
+
+        if not has_equivalents:
+            missing.append("equivalents")
+
+        if not has_related:
+            missing.append("related")
+
         if not missing:
             continue
 
@@ -117,6 +146,11 @@ def main():
             api_needed = False
             route = "local_ipa"
 
+        estimated_gain = (
+            len(aliases)
+            * sum(FIELD_WEIGHTS[f] for f in missing)
+        )
+
         rows.append({
             "family_id": family_id,
             "canonical_name": canonical,
@@ -127,34 +161,38 @@ def main():
             "missing": missing,
             "route": route,
             "api_needed": api_needed,
-            "estimated_gain": len(aliases),
+            "estimated_gain": estimated_gain,
+            "priority": estimated_gain,
         })
 
-    queue = pd.DataFrame(rows)
+    queue = (
+        pd.DataFrame(rows)
+        .sort_values(
+            ["estimated_gain", "family_size"],
+            ascending=False,
+        )
+        .reset_index(drop=True)
+    )
 
-    if not queue.empty:
+    queue.to_parquet(OUT, index=False)
 
-        queue["priority"] = (
-            queue["api_needed"].astype(int) * 100
-            + queue["estimated_gain"] * 10
-            + queue["language_confidence"] * 5
+    if len(families) and queue.empty:
+        raise RuntimeError(
+            f"Queue sanity check failed: {len(families)} families found but 0 queued."
         )
 
-        queue = queue.sort_values(
-            "priority",
-            ascending=False,
-        ).reset_index(drop=True)
-
-    queue.to_parquet(OUT,index=False)
-
-    print("="*45)
+    print("=" * 45)
     print("SMART QUEUE V3 BUILT")
-    print("="*45)
+    print("=" * 45)
     print(f"Families queued : {len(queue):,}")
-    print(f"API needed      : {queue['api_needed'].sum():,}")
-    print(f"Local IPA       : {(~queue['api_needed']).sum():,}")
-    print(f"Output          : {OUT.name}")
+
+    if not queue.empty:
+        print(f"API needed      : {queue['api_needed'].sum():,}")
+        print(f"Local IPA       : {(~queue['api_needed']).sum():,}")
+    else:
+        print("API needed      : 0")
+        print("Local IPA       : 0")
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     main()

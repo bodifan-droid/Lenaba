@@ -1,5 +1,17 @@
 {
-  "last_batch": "Arabic",
-  "completed_batches": [],
-  "completed_families": 5
+  "last_batch": "Irish",
+  "completed_batches": [
+    "Hebrew",
+    "English",
+    "Latin",
+    "Greek",
+    "French",
+    "Germanic",
+    "Italian",
+    "Spanish",
+    "Slavic",
+    "Irish"
+  ],
+  "completed_families": 81,
+  "completed_family_names": []
 }

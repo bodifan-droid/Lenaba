@@ -470,3 +470,49 @@ Ready for Smart Queue and Merge Engine.
 - Merge idempotency
 - Schema normalization
 - Confidence normalization
+
+# Changelog
+
+All notable changes to Lenaba are documented here.
+
+---
+
+## [v0.8-autopilot] — Sprint 8
+
+### Added
+
+* Smart Queue v3
+* Execution Queue
+* Overnight Mode
+* Resume support
+* Human Delay
+* Lunch & Coffee Break scheduling
+* Family Verification
+* Candidate Discovery
+* Behind Cache replay
+* Incremental Master updates
+* Family Graph verification
+* Etymology Graph synchronization
+
+### Improved
+
+* BehindTheName parser
+* batch prioritization
+* cache handling
+* incremental merge
+* execution stability
+* list normalization
+* parquet compatibility
+
+### Fixed
+
+* recursive batch loop
+* cache replay crashes
+* numpy/list handling
+* Arrow serialization
+* empty-array validation
+* completed batch tracking
+
+### Result
+
+The BehindTheName execution queue now completes automatically without manual intervention, making Lenaba's first autonomous Data Engine operational.

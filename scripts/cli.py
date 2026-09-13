@@ -13,7 +13,8 @@ COMMANDS = {
 
     ("build", "seed"): ROOT / "scripts/builders/build_seed.py",
     ("build", "registry"): ROOT / "scripts/builders/build_content_registry.py",
-    ("build", "queue"): ROOT / "scripts/builders/build_golden_queue.py",
+    ("build", "execution"): ROOT / "scripts/builders/build_execution_queue.py",
+    ("build", "golden"): ROOT / "scripts/builders/build_golden_queue.py",
     ("build", "pack"): ROOT / "scripts/builders/build_golden_pack.py",
     ("build", "factory"): ROOT / "scripts/builders/build_content_factory.py",
     ("build", "master"): ROOT / "scripts/builders/build_knowledge_master.py",
@@ -44,6 +45,9 @@ COMMANDS = {
     ("build", "family-lookup"): ROOT / "scripts/builders/build_family_lookup_v2.py",
     ("build", "confidence-v3"): ROOT / "scripts/builders/fix_confidence_v3.py",
     ("build", "family-merge"): ROOT / "scripts/builders/build_family_merge.py",
+    ("build", "family-graph"): ROOT / "scripts/builders/build_family_graph.py",
+    ("build","family-verification"): ROOT / "scripts/builders/build_family_verification.py",
+    ("build", "etymology-full"): ROOT / "scripts/builders/build_etymology_graph_full.py",
 
     ("audit", "factory"): ROOT / "scripts/audits/audit_content_factory.py",
     ("audit", "master"): ROOT / "scripts/audits/audit_knowledge_master.py",
@@ -66,8 +70,11 @@ COMMANDS = {
     ("audit", "schema"): ROOT / "scripts/audits/audit_master_schema.py",
     ("audit", "family-lookup"): ROOT / "scripts/audits/audit_family_lookup.py",
     ("audit", "platform"): ROOT / "scripts/audits/audit_platform.py",
+    ("audit", "family-graph"): ROOT / "scripts/audits/audit_family_graph.py",
+    ("audit","language-distribution"): ROOT / "scripts/audits/audit_language_distribution.py",
 
     ("fetch",): ROOT / "scripts/executors/fetch_behind_smart.py",
+    ("fetch","overnight"): ROOT / "scripts/executors/fetch_behind_smart.py",
 }
 
 
@@ -87,23 +94,6 @@ def run_script(path: Path, extra_args=None):
 
     subprocess.run(
         [sys.executable, "-m", module, *extra_args],
-        cwd=ROOT,
-        check=True,
-    )
-
-    print("[OK]\n")
-
-    module = (
-        path.relative_to(ROOT)
-            .with_suffix("")
-            .as_posix()
-            .replace("/", ".")
-    )
-
-    print(f"[RUN] {module}")
-
-    subprocess.run(
-        [sys.executable, "-m", module],
         cwd=ROOT,
         check=True,
     )
@@ -194,7 +184,12 @@ def main():
 
     # ---- Fetch executor ----
     if args[0] == "fetch":
-        run_script(COMMANDS[("fetch",)], list(args[1:]))
+
+        run_script(
+            COMMANDS[("fetch",)],
+            args[1:],
+        )
+
         return
 
     script = COMMANDS.get(args)
