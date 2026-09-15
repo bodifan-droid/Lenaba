@@ -529,3 +529,43 @@ The BehindTheName execution queue now completes automatically without manual int
 - Stabilized Family Graph state handling
 - Fixed cache replay and parquet compatibility
 - Reduced Behind Queue from 31 to 0
+
+## [0.2.0] – Family Script Foundation
+
+### Added
+
+* Family-first architecture for content generation.
+* Queue Platform (`queue_sync`, `queue_orchestrator`, `fetch_doctor`, `execution_engine`).
+* Shared normalization layer (`normalize_key`, `normalize_series`).
+* Unicode-safe matching for aliases and canonical families.
+* Duplicate slug resolver (0 duplicate slugs).
+* Automatic DATA_SCHEMA generator.
+* Coverage Report after enrichment.
+* Knowledge Generator foundation with staging design.
+* Family Script Engine design.
+* Content Compiler architecture.
+* Family Fun Fact concept.
+* Sentence Engine and Synonym Engine design.
+* Batch IDs and rollback architecture.
+* Queue diagnostics (`next_batch`, Fetch Doctor).
+
+### Changed
+
+* AI is now responsible only for canonical family knowledge.
+* Editorial content will be generated locally by the Content Compiler.
+* `execution_queue` is now the single source of truth.
+* All joins use shared normalization.
+
+### Fixed
+
+* Unicode alias matching.
+* Language resolver normalization.
+* Execution Engine family matching.
+* Duplicate slug collisions.
+* Import path consistency (`scripts/lib`).
+
+### Status
+
+* Data Platform stable.
+* Queue Platform operational.
+* Ready for Family Script implementation.
