@@ -1,10 +1,15 @@
 from __future__ import annotations
 
+import sys
+from pathlib import Path
 from datetime import datetime
 
 import pandas as pd
 
-from scripts.lib.paths import KNOWLEDGE
+ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT / "scripts"))
+
+from lib.paths import KNOWLEDGE
 
 GRAPH = KNOWLEDGE / "family_graph.parquet"
 ETYMOLOGY = KNOWLEDGE / "etymology_graph.parquet"

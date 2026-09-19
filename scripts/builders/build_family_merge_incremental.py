@@ -1,9 +1,15 @@
 from __future__ import annotations
 
-import pandas as pd
-import numpy as np
+import sys
+from pathlib import Path
 
-from scripts.lib.paths import KNOWLEDGE
+import numpy as np
+import pandas as pd
+
+ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT / "scripts"))
+
+from lib.paths import KNOWLEDGE
 
 MASTER = KNOWLEDGE / "knowledge_master.parquet"
 LOOKUP = KNOWLEDGE / "family_lookup.parquet"
@@ -93,5 +99,4 @@ def merge_family(canonical_name: str):
 
 
 if __name__ == "__main__":
-
     print("Use merge_family(canonical_name)")

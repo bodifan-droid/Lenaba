@@ -1,0 +1,24 @@
+{
+  "ALISA": {
+    "must_include": [
+      "ALISA",
+      "ALISE",
+      "ALISIA",
+      "AALIS",
+      "ALICIA",
+      "ALICA"
+    ],
+    "must_exclude": [
+      "HEIDI",
+      "HEIDA",
+      "ELKE",
+      "ADELAIDE",
+      "ADELE",
+      "ADA",
+      "ADDIE",
+      "ALINA",
+      "ALIX",
+      "DELIA"
+    ]
+  }
+}

@@ -1,30 +1,34 @@
-
 from __future__ import annotations
-from scripts.lib.family_status import mark_completed
-import sys
-import pandas as pd
-import json
-from pathlib import Path
-import os
-import requests
-from dotenv import load_dotenv
-from datetime import datetime
-from bs4 import BeautifulSoup
-from scripts.lib.behind_client import fetch_html
-from scripts.lib.behind_cache import get_cached, save_cache
-from scripts.lib.behind_parser import parse_name_page
-from scripts.lib.fetch_results import save_result
-from scripts.lib.pipeline_hooks import after_fetch
-from scripts.lib.human_delay import HumanDelay
-from scripts.lib.fetch_controller import FetchController
-from scripts.lib.queue_selector import next_batch
 
-from scripts.lib.paths import EXECUTION, KNOWLEDGE
+import sys
+from pathlib import Path
+
+import pandas as pd
+
+ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT / "scripts"))
+
+from lib.paths import KNOWLEDGE
+
+from lib.family_status import mark_completed
+from lib.behind_client import fetch_html
+from lib.behind_cache import get_cached, save_cache
+from lib.behind_parser import parse_name_page
+from lib.family_updater import update_family
+from lib.fetch_results import save_result
+from lib.pipeline_hooks import after_fetch
+from lib.human_delay import HumanDelay
+from lib.fetch_controller import FetchController
+from lib.queue_selector import next_batch
+from lib.paths import EXECUTION, KNOWLEDGE
 
 QUEUE = KNOWLEDGE / "execution_queue.parquet"
+NAMES = ROOT / "data" / "enriched" / "names.parquet"
 BATCHES = KNOWLEDGE / "execution_batches.parquet"
 
 STATE = Path("data/outputs/fetch_state.json")
+
+
 
 load_dotenv()
 
@@ -115,6 +119,18 @@ def fetch_family(name):
         mark_completed(name)
 
         cached["cached"] = True
+        names = pd.read_parquet(NAMES)
+
+        names, canonical, members = update_family(
+            names,
+            name,
+            cached,
+        )
+
+        names.to_parquet(NAMES, index=False)
+
+        cached["canonical_family"] = canonical
+        cached["family_members"] = len(members)
         cached["stats"] = stats
 
         return cached
@@ -131,6 +147,22 @@ def fetch_family(name):
 
     parsed = parse_name_page(html)
 
+    # ---------- NEW: update whole family ----------
+
+    names = pd.read_parquet(NAMES)
+
+    names, canonical, members = update_family(
+        names,
+        name,
+        parsed,
+    )
+
+    names.to_parquet(NAMES, index=False)
+
+    print(f"    family : {canonical} ({len(members)} members)")
+
+    # ----------------------------------------------
+
     save_result(name, parsed)
 
     save_cache(
@@ -145,6 +177,8 @@ def fetch_family(name):
 
     parsed["stats"] = stats
     parsed["cached"] = False
+    parsed["canonical_family"] = canonical
+    parsed["family_members"] = len(members)
 
     return parsed
 

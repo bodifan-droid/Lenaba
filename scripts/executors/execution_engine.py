@@ -15,6 +15,8 @@ NAMES = ROOT / "data" / "enriched" / "names.parquet"
 GRAPH = ROOT / "data" / "knowledge" / "etymology_graph.parquet"
 FETCH = ROOT / "data" / "outputs" / "fetch_results.parquet"
 
+
+
 def is_missing(series: pd.Series) -> pd.Series:
     return (
         series.isna()
