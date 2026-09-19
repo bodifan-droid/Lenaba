@@ -16,6 +16,9 @@
 
 ## Sprint 9 — Data Platform & Family Script Engine
 
+Sprint 9
+[x] Family Engine V2 (Completed)
+
 ### Goal
 
 Transform Lenaba into a scalable content platform where AI generates canonical family knowledge and the local Content Compiler creates unique SEO pages for every name.

@@ -55,7 +55,7 @@ def ensure_columns(df):
 def next_names(df, limit):
 
     pending = (
-        df[df["family_processed"] == False]
+        df[~df["family_processed"].fillna(False).astype(bool)]
         .sort_values("completion_score")
     )
 
@@ -65,6 +65,13 @@ def next_names(df, limit):
 def process_name(df, idx):
 
     name = df.at[idx, "name"]
+
+    # Skip if this name was completed earlier in this same run
+    if bool(df.at[idx, "family_processed"]):
+        family = df.at[idx, "canonical_family"] or df.at[idx, "family_id"] or "UNKNOWN"
+        print(f"\n{name}")
+        print(f"  skipped (family already done: {family})")
+        return df
 
     print(f"\n{name}")
 
@@ -102,8 +109,6 @@ def process_name(df, idx):
             html = None
         else:
             _, html = result
-
-        human.after_request()
 
         human.after_request()
 
@@ -178,10 +183,11 @@ def process_name(df, idx):
         parsed,
     )
 
+    parsed["completion_score"] = completion_score(parsed)
 
     mark_done(family_id)
 
-    after_fetch(name, parsed)
+    after_fetch(name, parsed, family_id, members)
 
     btn_total = len(members)
     coverage = f"{updated}/{btn_total}"
@@ -189,8 +195,9 @@ def process_name(df, idx):
 
     print(f"  family: {family_id}")
     print(f"  family members: {btn_total}")
-    print(f"  updated rows: {updated}")
-    print(f"  coverage: {coverage}")
+    print(f"  Lenaba rows updated: {updated}")
+    print(f"  BTN family members : {btn_total}")
+    print(f"  Missing BTN names  : {missing}")
     print(f"  missing: {missing}")
 
     if missing_names:
@@ -204,9 +211,6 @@ def process_name(df, idx):
         missing_names,
     )
 
-    parsed["completion_score"] = completion_score(parsed)
-
-    members = sorted(set(members))
     preview = ", ".join(members[:8])
 
     if len(members) > 8:
@@ -234,12 +238,23 @@ def run(limit=10):
 
     print(f"Processing: {len(pending)} names")
 
-    for idx in pending.index:
+    processed = 0
+
+    while processed < limit:
+
+        pending = next_names(df, 1)
+
+        if pending.empty:
+            break
+
+        idx = pending.index[0]
 
         df = process_name(df, idx)
 
         df.to_parquet(NAMES, index=False)
         print("  saved checkpoint")
+
+        processed += 1
 
     print("\nDone.")
 

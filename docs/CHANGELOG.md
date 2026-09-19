@@ -570,4 +570,32 @@ The BehindTheName execution queue now completes automatically without manual int
 * Queue Platform operational.
 * Ready for Family Script implementation.
 
+# [0.2.0] – Family Engine V2 RC1
 
+## Added
+
+- Family Builder V2 architecture.
+- Dynamic execution queue (family-first processing).
+- Automatic family propagation across duplicate names.
+- Checkpoint after every processed family.
+- Resume support after interruption.
+
+## Changed
+
+- BehindTheName parser now processes entire families instead of single names.
+- `family_processed`, `family_id`, `canonical_family`, `family_slug` are propagated to all matching rows.
+- Execution queue now refreshes after every completed family.
+- Duplicate names (same name in multiple countries) are updated together.
+
+## Fixed
+
+- Jennifer HTML fetch regression.
+- Emma canonical resolution.
+- Katherine/Katya canonical chain.
+- Donna family propagation.
+- Amy duplicate-row processing.
+- Repeated family execution (Christine → Christina loop).
+
+## Result
+
+One BehindTheName request now updates an entire family instead of a single name.

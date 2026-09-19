@@ -39,3 +39,18 @@ Generate canonical family knowledge once and compile unique pages locally.
 * Script versioning
 * Compiler versioning
 * Family regeneration
+
+
+Execution Queue
+      ↓
+Pending Family
+      ↓
+BehindTheName
+      ↓
+Parse family
+      ↓
+Update all matching rows
+      ↓
+Mark family completed
+      ↓
+Next family
