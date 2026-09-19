@@ -172,58 +172,45 @@ def process_name(df, idx):
     # Update family
     # -----------------------------
 
-    df, canonical, members, updated, missing_names = update_family(
+    df, family_id, members, updated, missing_names = update_family(
         df,
         name,
         parsed,
     )
-    mark_done(canonical)
+
+
+    mark_done(family_id)
 
     after_fetch(name, parsed)
 
-    collect_missing_family(
-        canonical,
-        parsed,
-        missing_names,
-    )
-    parsed["completion_score"] = completion_score(parsed)
-
-    member_keys = {
-        normalize_name_key(m)
-        for m in members
-    }
-
-    mask = (
-        df["name"]
-        .map(normalize_name_key)
-        .isin(member_keys)
-    )
-
-    df.loc[mask, "family_processed"] = True
-    df.loc[mask, "canonical_family"] = canonical
-    df.loc[mask, "family_source"] = "behindthename"
-
-    members = sorted(set(members))
     btn_total = len(members)
-    missing = btn_total - updated
+    coverage = f"{updated}/{btn_total}"
+    missing = len(missing_names)
 
-    print(f"  family: {canonical}")
+    print(f"  family: {family_id}")
     print(f"  family members: {btn_total}")
     print(f"  updated rows: {updated}")
-    print(f"  coverage: {updated}/{btn_total}")
+    print(f"  coverage: {coverage}")
     print(f"  missing: {missing}")
 
     if missing_names:
         print("  missing names:")
-        for item in sorted(missing_names):
+        for item in missing_names[:10]:
             print(f"    - {item}")
 
+    collect_missing_family(
+        family_id,
+        parsed,
+        missing_names,
+    )
+
+    parsed["completion_score"] = completion_score(parsed)
+
+    members = sorted(set(members))
     preview = ", ".join(members[:8])
 
     if len(members) > 8:
         preview += ", ..."
-
-    print(f"  preview: {preview}")
 
     return df
 
