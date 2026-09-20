@@ -5,6 +5,8 @@ from pathlib import Path
 
 import pandas as pd
 from dotenv import load_dotenv
+import time
+from collections import deque
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts"))
@@ -75,6 +77,16 @@ def process_name(df, idx):
 
     print(f"\n{name}")
 
+    family = (
+        df.at[idx, "canonical_family"]
+        or df.at[idx, "family_id"]
+    )
+
+    if isinstance(family, str) and is_done(family):
+        print(f"  skipped (family already completed: {family})")
+        df.at[idx, "family_processed"] = True
+        return df
+
     cache_file = HTML_CACHE / f"{slugify(name)}.html"
 
     # -----------------------------
@@ -90,16 +102,6 @@ def process_name(df, idx):
         print("  html cache")
 
     else:
-
-        canonical = df.at[idx, "canonical_family"]
-
-        if isinstance(canonical, str) and is_done(canonical):
-
-            print(f"  skipped (family already done: {canonical})")
-
-            df.at[idx, "family_processed"] = True
-
-            return df
 
         human.before_request()
 
@@ -187,7 +189,13 @@ def process_name(df, idx):
 
     mark_done(family_id)
 
-    after_fetch(name, parsed, family_id, members)
+    after_fetch(
+        name,
+        parsed,
+        family_id,
+        members,
+        missing_names,
+    )
 
     btn_total = len(members)
     coverage = f"{updated}/{btn_total}"
@@ -198,7 +206,6 @@ def process_name(df, idx):
     print(f"  Lenaba rows updated: {updated}")
     print(f"  BTN family members : {btn_total}")
     print(f"  Missing BTN names  : {missing}")
-    print(f"  missing: {missing}")
 
     if missing_names:
         print("  missing names:")
@@ -231,6 +238,12 @@ def run(limit=10):
     completed = int(df["family_processed"].sum())
     remaining = len(df) - completed
 
+    start_time = time.time()
+    last_times = deque(maxlen=20)
+
+    rows_updated_total = 0
+    families_processed = 0
+
     print(f"Completed : {completed:,}")
     print(f"Remaining : {remaining:,}")
 
@@ -249,12 +262,65 @@ def run(limit=10):
 
         idx = pending.index[0]
 
+        family_start = time.time()
+
         df = process_name(df, idx)
 
         df.to_parquet(NAMES, index=False)
         print("  saved checkpoint")
 
+        families_processed += 1
+
+        family_time = time.time() - family_start
+        last_times.append(family_time)
+
+        elapsed = time.time() - start_time
+        avg_time = sum(last_times) / len(last_times)
+
+        current_completed = int(df["family_processed"].sum())
+        current_remaining = len(df) - current_completed
+
+        families_per_hour = 3600 / avg_time if avg_time else 0
+        eta_hours = current_remaining / families_per_hour if families_per_hour else 0
+
+        print(f"  progress: {current_completed:,}/{len(df):,}")
+        print(f"  speed   : {families_per_hour:.1f} families/hour")
+        print(f"  ETA     : {eta_hours:.1f} hours ({eta_hours/24:.1f} days)")
+
         processed += 1
+
+    elapsed = time.time() - start_time
+
+    hours = int(elapsed // 3600)
+    minutes = int((elapsed % 3600) // 60)
+    seconds = int(elapsed % 60)
+
+    avg_speed = (
+        families_processed / (elapsed / 3600)
+        if elapsed else 0
+    )
+
+    completed_now = int(df["family_processed"].sum())
+    remaining_now = len(df) - completed_now
+
+    eta_hours = (
+        remaining_now / avg_speed
+        if avg_speed else 0
+    )
+
+    print("\n" + "="*50)
+    print("RUN SUMMARY")
+    print("="*50)
+
+    print(f"Families processed : {families_processed}")
+    print(f"Elapsed            : {hours:02}:{minutes:02}:{seconds:02}")
+    print(f"Average speed      : {avg_speed:.1f} families/hour")
+
+    print("\nProgress")
+    print(f"Completed          : {completed_now:,}/{len(df):,}")
+    print(f"Remaining          : {remaining_now:,}")
+
+    print(f"\nETA remaining      : {eta_hours/24:.1f} days")
 
     print("\nDone.")
 

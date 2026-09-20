@@ -19,6 +19,24 @@
 Sprint 9
 [x] Family Engine V2 (Completed)
 
+## Sprint 9 — Family Engine V2
+
+- [x] Family-first processing
+- [x] Family metadata propagation
+- [x] Duplicate-row handling
+- [x] Dynamic queue refresh
+- [x] Checkpoint & Resume
+
+## Sprint 10 — Data Quality
+
+### Priority
+
+- [ ] Editorial Queue workflow
+- [ ] Missing BTN review pipeline
+- [ ] Family QA
+- [ ] Canonical validation
+- [ ] Origin & Meaning expansion
+
 ### Goal
 
 Transform Lenaba into a scalable content platform where AI generates canonical family knowledge and the local Content Compiler creates unique SEO pages for every name.

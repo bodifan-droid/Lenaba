@@ -45,12 +45,20 @@ Execution Queue
       ↓
 Pending Family
       ↓
-BehindTheName
-      ↓
-Parse family
-      ↓
-Update all matching rows
-      ↓
-Mark family completed
-      ↓
-Next family
+Family Completed?
+      ├── Yes → Skip
+      └── No
+            ↓
+       HTML Cache?
+      ├── Yes → Parse
+      └── No → Fetch BTN
+            ↓
+       Parse Family
+            ↓
+   Update All Matching Rows
+            ↓
+      Save Checkpoint
+            ↓
+      Refresh Queue
+            ↓
+      Next Family

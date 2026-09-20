@@ -599,3 +599,38 @@ The BehindTheName execution queue now completes automatically without manual int
 ## Result
 
 One BehindTheName request now updates an entire family instead of a single name.
+
+# [0.2.0] – Family Engine
+
+**Status:** Released
+
+## Added
+
+- Family Builder V2 architecture.
+- Dynamic family-first execution queue.
+- Checkpoint after every processed family.
+- Resume support after interruption.
+- ETA Calculator with rolling average.
+- Run Summary after execution.
+- Missing BTN Names Collector (`data/editorial/missing_btn_names.parquet`).
+
+## Changed
+
+- BehindTheName now processes entire families instead of individual names.
+- Family metadata propagates to all duplicate name rows.
+- Execution queue refreshes after every completed family.
+- Completed families are skipped before HTML parsing.
+
+## Fixed
+
+- Jennifer HTML fetch regression.
+- Emma canonical resolution.
+- Katherine/Katya family resolution.
+- Donna propagation.
+- Amy duplicate-row handling.
+- Christine repeated-family execution.
+- Windows `knowledge_master.parquet` write error.
+
+## Result
+
+One BehindTheName request now updates an entire family, persists progress automatically, and avoids reprocessing completed families.

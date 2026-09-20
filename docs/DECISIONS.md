@@ -73,7 +73,41 @@ BehindTheName pages describe relationships between multiple names. Parsing every
 - One BTN page updates the whole family.
 - Duplicate database rows receive the same family metadata.
 - Execution Queue works on completed families rather than repeated names.
-  
+
+
+## ADR-009 — Family-first Processing
+
+**Status:** Accepted
+
+### Decision
+
+Lenaba processes families instead of individual names.
+
+### Why
+
+BehindTheName pages describe relationships between multiple names. Parsing every variant separately caused duplicate work and inconsistent family assignments.
+
+### Result
+
+- One BTN request updates the whole family.
+- Duplicate database rows receive identical family metadata.
+- Execution Queue operates on completed families.
+- Interrupted runs can safely resume.
+
+## ADR-010 — Resume-first Execution
+
+**Status:** Accepted
+
+### Decision
+
+Completed families are skipped before HTML cache or network requests.
+
+### Result
+
+- Faster repeated runs.
+- HTML cache is used only for unfinished families.
+- Execution Queue becomes the single source of truth for progress.
+
 ## ADR-010 — Knowledge ≠ Content
 
 Separate:
