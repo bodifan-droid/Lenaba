@@ -36,6 +36,7 @@ Sprint 9
 - [ ] Family QA
 - [ ] Canonical validation
 - [ ] Origin & Meaning expansion
+- [x] ADR-011 — Canonical Data Flow
 
 ### Goal
 

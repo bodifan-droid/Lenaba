@@ -634,3 +634,25 @@ One BehindTheName request now updates an entire family instead of a single name.
 ## Result
 
 One BehindTheName request now updates an entire family, persists progress automatically, and avoids reprocessing completed families.
+
+v0.10 — BTN Family Builder Complete
+
+Added:
+✓ Canonical Family Resolver
+✓ Automatic Family Propagation
+✓ Queue Auto-Complete
+✓ Script Variants
+✓ Multi-language Pronunciations
+✓ Variant-Language Mapping
+✓ Etymology Roots
+✓ BTN Categories
+✓ Single Family Mode
+✓ Stable BTN Selectors
+
+Changed:
+✓ fetch_results became universal BTN cache
+✓ variant_languages became Single Source of Truth
+
+Removed:
+✓ orphan source_references knowledge table
+✓ unnecessary namesakes parsing

@@ -64,13 +64,17 @@ def next_names(df, limit):
     return pending.head(limit)
 
 
-def process_name(df, idx):
+def process_name(df, idx, force=False):
 
     name = df.at[idx, "name"]
 
-    # Skip if this name was completed earlier in this same run
-    if bool(df.at[idx, "family_processed"]):
-        family = df.at[idx, "canonical_family"] or df.at[idx, "family_id"] or "UNKNOWN"
+    # Skip only in production mode
+    if not force and bool(df.at[idx, "family_processed"]):
+        family = (
+            df.at[idx, "canonical_family"]
+            or df.at[idx, "family_id"]
+            or "UNKNOWN"
+        )
         print(f"\n{name}")
         print(f"  skipped (family already done: {family})")
         return df
@@ -82,7 +86,7 @@ def process_name(df, idx):
         or df.at[idx, "family_id"]
     )
 
-    if isinstance(family, str) and is_done(family):
+    if not force and isinstance(family, str) and is_done(family):
         print(f"  skipped (family already completed: {family})")
         df.at[idx, "family_processed"] = True
         return df
@@ -225,7 +229,7 @@ def process_name(df, idx):
 
     return df
 
-def run(limit=10):
+def run(limit=10, target_name=None):
 
     print("=" * 50)
     print("LENABA FAMILY BUILDER V2")
@@ -253,6 +257,35 @@ def run(limit=10):
 
     processed = 0
 
+    # ---------------------------------------------
+    # Single Family Mode (--name)
+    # ---------------------------------------------
+
+    if target_name:
+
+        match = df[
+            df["name"].str.upper() == target_name.upper()
+        ]
+
+        if match.empty:
+            print(f"Name '{target_name}' not found.")
+            return
+
+        idx = match.index[0]
+
+        print("=" * 50)
+        print("LENABA SINGLE FAMILY MODE")
+        print("=" * 50)
+        print(f"Target: {target_name}")
+        print()
+
+        df = process_name(df, idx, force=True)
+
+        df.to_parquet(NAMES, index=False)
+
+        print("\nDone.")
+        return
+
     while processed < limit:
 
         pending = next_names(df, 1)
@@ -264,7 +297,7 @@ def run(limit=10):
 
         family_start = time.time()
 
-        df = process_name(df, idx)
+        df = process_name(df, idx, force=True)
 
         df.to_parquet(NAMES, index=False)
         print("  saved checkpoint")
@@ -328,8 +361,12 @@ def run(limit=10):
 if __name__ == "__main__":
 
     limit = 10
+    name = None
 
     if "--limit" in sys.argv:
         limit = int(sys.argv[sys.argv.index("--limit") + 1])
 
-    run(limit)
+    if "--name" in sys.argv:
+        name = sys.argv[sys.argv.index("--name") + 1]
+
+    run(limit, name)

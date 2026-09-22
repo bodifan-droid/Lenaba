@@ -120,20 +120,40 @@ Content is always compiled.
 
 ---
 
-## ADR-011 — Content Compiler
+## ADR-011 — Canonical Data Flow
 
-Pages are built from reusable content blocks instead of static AI-written articles.
+**Status:** Accepted
 
-Benefits:
+### Decision
 
-* one-click regeneration
-* controlled uniqueness
-* reusable SEO system
+Lenaba uses a three-stage data pipeline for all structured BehindTheName data.
 
----
+### Canonical flow
 
-## ADR-012 — Queue as Source of Truth
+BehindTheName
+      ↓
+fetch_results.parquet
+      ↓
+knowledge_master.parquet
+      ↓
+names.parquet
 
-`execution_queue` becomes the central orchestration layer.
+### Responsibilities
 
-All executors work through canonical families.
+| Layer                      | Purpose                                             |
+| -------------------------- | --------------------------------------------------- |
+| `fetch_results.parquet`    | Immutable journal of parsed BTN facts.              |
+| `knowledge_master.parquet` | Canonical knowledge store (Single Source of Truth). |
+| `names.parquet`            | Serving database used by the website and apps.      |
+
+### Rules
+
+- BTN never writes directly to `names.parquet`.
+- Every newly parsed fact is first stored in `fetch_results.parquet`.
+- `master_writer.py` synchronizes new facts into `knowledge_master.parquet`.
+- `build_family_completion.py` propagates missing structured fields into `names.parquet`.
+- Existing populated fields are never overwritten (`fill only empty`).
+
+### Why
+
+This architecture prevents duplicated logic, avoids rebuilding knowledge from HTML, allows reproducible imports, and keeps one canonical source for structured name data.
